@@ -8,21 +8,22 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by nesferatos on 08.08.2015.
  */
 
+interface PropertyTreeItemFunction {
+    boolean process(PropertyTreeItem item);
+}
+
 public class PropertyTreeItem extends TreeItem {
 
     public static Image addToListIcon = new Image(PropertyTreeItem.class.getResourceAsStream("/add.png"));
     public static Image blankIcon = new Image(PropertyTreeItem.class.getResourceAsStream("/blank.png"));
     public static Image recreatableIcon = new Image(PropertyTreeItem.class.getResourceAsStream("/recreatable.png"));
-
-    public void setFirstTimeChildren(boolean firstTimeChildren) {
-        this.firstTimeChildren = firstTimeChildren;
-    }
 
     private boolean firstTimeChildren = true;
     private ObjectProperty dataProperty = new SimpleObjectProperty<>();
@@ -65,19 +66,6 @@ public class PropertyTreeItem extends TreeItem {
         }
     }
 
-    /*public Object getObjectParent() {
-        if (getData() instanceof List) {
-            if (getParent() != null) {
-                PropertyTreeItem par = (PropertyTreeItem)getParent();
-                return par.getData();
-            } else {
-                return null;
-            }
-        } else {
-            return getData();
-        }
-    }*/
-
     public void createCommand(Object obj) {
 
         if (getData() instanceof List) {
@@ -96,48 +84,72 @@ public class PropertyTreeItem extends TreeItem {
         }
         setGraphic(new ImageView(PropertyTreeItem.getIconFor(getData())));
 
-        //update selection
-        /*int selected = getTreeView().getSelectionModel().getSelectedIndex();
-        getTreeView().getSelectionModel().clearSelection();
-        getTreeView().getSelectionModel().select(selected);*/
+        //getting root
+        PropertyTreeItem parent = this;
+        while (parent.getParent() != null) {
+            parent = (PropertyTreeItem) parent.getParent();
+        }
 
+        iterateAllChildTreeItems(parent, it -> {
+            if (it.getData() == getData()) {
+                ((PropertyTreeItem)it).rebuildChildren();
+                return true;
+            };
+            return false;
+        });
+
+    }
+
+    private void iterateAllChildTreeItems(PropertyTreeItem parent, PropertyTreeItemFunction function) {
+        for (TreeItem item : parent.getChildren()) {
+            if (!function.process((PropertyTreeItem) item)) {
+                iterateAllChildTreeItems((PropertyTreeItem) item, function);
+            }
+        }
+    }
+
+    public void rebuildChildren() {
+
+        List newChildren = new ArrayList<>();
+
+        Object value = getData();
+
+        if (value != null) {
+            if (value instanceof List) {
+                for (Object i : ((List) value)) {
+                    newChildren.add(new PropertyTreeItem(i, null));
+                }
+            }
+            List<Field> fields = PropertyUtils.getSettingNodes(value);
+            for (Field field : fields) {
+                try {
+                    Object obj = field.get(value);
+
+                    Setting settingsAnnotation = field.getAnnotation(Setting.class);
+
+                    PropertyTreeItem treeItem = new PropertyTreeItem(obj, field);
+                    treeItem.factoryName = settingsAnnotation.factoryName();
+                    if (!treeItem.factoryName.equals("")) {
+                        ImageView imageView = new ImageView(getIconFor(obj));
+
+                        treeItem.setGraphic(imageView);
+                    }
+                    newChildren.add(treeItem);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        getChildren().setAll(newChildren);
     }
 
     @Override
     public ObservableList<TreeItem> getChildren() {
         if (firstTimeChildren) {
             firstTimeChildren = false;
-
-            Object value = getData();
-
-            if (value != null) {
-                if (value instanceof List) {
-                    for (Object i : ((List) value)) {
-                        super.getChildren().add(new PropertyTreeItem(i, null));
-                    }
-                }
-                List<Field> fields = PropertyUtils.getSettingNodes(value);
-                for (Field field : fields) {
-                    try {
-                        Object obj = field.get(value);
-
-                        Setting settingsAnnotation = field.getAnnotation(Setting.class);
-
-                        PropertyTreeItem treeItem = new PropertyTreeItem(obj, field);
-                        treeItem.factoryName = settingsAnnotation.factoryName();
-                        if (!treeItem.factoryName.equals("")) {
-                            ImageView imageView = new ImageView(getIconFor(obj));
-
-                            treeItem.setGraphic(imageView);
-                        }
-                        super.getChildren().add(treeItem);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+            rebuildChildren();
         }
-
         return super.getChildren();
     }
 
@@ -146,7 +158,6 @@ public class PropertyTreeItem extends TreeItem {
     public boolean isLeaf() {
         return getChildren().isEmpty();
     }
-
 
     public Field getField() {
         return field;
