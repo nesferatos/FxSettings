@@ -47,6 +47,13 @@ public class PropertyUtils {
         return null;
     }
 
+    /***
+     * get object by name - using getter if defined
+     * @param object
+     * @param field
+     * @param <T>
+     * @return
+     */
     public static <T> T get(Object object, Field field) {
         Method m = getGetter(field.getName(), field.getName());
         if (m == null) {
