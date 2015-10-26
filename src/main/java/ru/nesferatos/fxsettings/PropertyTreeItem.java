@@ -28,30 +28,12 @@ public class PropertyTreeItem extends TreeItem {
     private boolean firstTimeChildren = true;
     private ObjectProperty dataProperty = new SimpleObjectProperty<>();
     private Field field;
-
-    public String getFactoryName() {
-        return factoryName;
-    }
-
     private String factoryName = "";
 
     public PropertyTreeItem(Object data, Field field) {
-        //super(field.getAnnotation(Setting.class).name().equals("") ? field.getName() : field.getAnnotation(Setting.class).name());
         super(PropertyUtils.getNameFor(data, field));
         dataProperty.set(data);
         this.field = field;
-    }
-
-    public Object getData() {
-        return dataProperty.get();
-    }
-
-    public void setData(Object data) {
-        dataProperty.set(data);
-    }
-
-    public ObjectProperty getDataProperty() {
-        return dataProperty;
     }
 
     public static Image getIconFor(Object object) {
@@ -64,6 +46,22 @@ public class PropertyTreeItem extends TreeItem {
                 return recreatableIcon;
             }
         }
+    }
+
+    public String getFactoryName() {
+        return factoryName;
+    }
+
+    public Object getData() {
+        return dataProperty.get();
+    }
+
+    public void setData(Object data) {
+        dataProperty.set(data);
+    }
+
+    public ObjectProperty getDataProperty() {
+        return dataProperty;
     }
 
     public void createCommand(Object obj) {
@@ -92,12 +90,11 @@ public class PropertyTreeItem extends TreeItem {
 
         iterateAllChildTreeItems(parent, it -> {
             if (it.getData() == getData()) {
-                ((PropertyTreeItem)it).rebuildChildren();
+                it.rebuildChildren();
                 return true;
             };
             return false;
         });
-
     }
 
     private void iterateAllChildTreeItems(PropertyTreeItem parent, PropertyTreeItemFunction function) {
@@ -142,6 +139,7 @@ public class PropertyTreeItem extends TreeItem {
         }
 
         getChildren().setAll(newChildren);
+
     }
 
     @Override
@@ -152,7 +150,6 @@ public class PropertyTreeItem extends TreeItem {
         }
         return super.getChildren();
     }
-
 
     @Override
     public boolean isLeaf() {
