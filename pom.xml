@@ -4,9 +4,36 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>groupId</groupId>
-    <artifactId>FxSettings</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>ru.nesferatos</groupId>
+    <artifactId>fxsettings</artifactId>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>FxSettings</name>
+    <description>JavaFX widget for editing settings in your app. It uses POJO as settings containers.</description>
+    <url>https://github.com/nesferatos/FxSettings</url>
+
+    <scm>
+        <url>http://fxsettings.nesferatos.ru</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Nikita Tsymbal</name>
+            <email>nesferatos@gmail.com</email>
+            <roles>
+                <role>author</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
