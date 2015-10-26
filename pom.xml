@@ -11,10 +11,10 @@
 
     <name>FxSettings</name>
     <description>JavaFX widget for editing settings in your app. It uses POJO as settings containers.</description>
-    <url>https://github.com/nesferatos/FxSettings</url>
+    <url>https://fxsettings.nesferatos.ru</url>
 
     <scm>
-        <url>http://fxsettings.nesferatos.ru</url>
+        <url>https://github.com/nesferatos/FxSettings.git</url>
     </scm>
 
     <licenses>
