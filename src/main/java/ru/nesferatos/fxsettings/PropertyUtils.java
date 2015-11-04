@@ -23,16 +23,39 @@ public class PropertyUtils {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
+    /***
+     * get setter method by property name
+     *
+     * @param object container of getter
+     * @param name name of property
+     * @param type type of property
+     * @return requested setter
+     */
     public static Method getSetter(Object object, String name, Class type) {
         String setterName = "set" + capitaliseName(name);
         return getMethod(object, setterName, type);
     }
 
+    /***
+     * get getter by name
+     *
+     * @param object container of setter
+     * @param name name of property
+     * @return requester getter
+     */
     public static Method getGetter(Object object, String name) {
         String getterName = "get" + capitaliseName(name);
         return getMethod(object, getterName);
     }
 
+    /***
+     * get method by name
+     *
+     * @param object container of method
+     * @param name name of method
+     * @param params params of method
+     * @return requested method
+     */
     public static Method getMethod(Object object, String name, Object... params) {
         try {
             List<Class> classParams = new ArrayList<>();
@@ -48,11 +71,12 @@ public class PropertyUtils {
     }
 
     /***
-     * get object by name - using getter if defined
-     * @param object
-     * @param field
-     * @param <T>
-     * @return
+     * get property by field - using getter if defined
+     *
+     * @param object container of property
+     * @param field property field
+     * @param <T> type to return
+     * @return property
      */
     public static <T> T get(Object object, Field field) {
         Method m = getGetter(field.getName(), field.getName());
@@ -74,6 +98,13 @@ public class PropertyUtils {
         return null;
     }
 
+    /***
+     * set property by field - using setter if defined
+     *
+     * @param object container of property
+     * @param field property field
+     * @param value value to set
+     */
     public static void set(Object object, Field field, Object value) {
         Method method = getSetter(object, field.getName(), field.getType());
         if (method == null) {
@@ -101,6 +132,14 @@ public class PropertyUtils {
         }).get(0);
     };
 
+    /***
+     * get all fields of object
+     *
+     * @param fields empty list to recursive fill
+     * @param type class of fields container
+     * @param filter fields filter
+     * @return list of fields
+     */
     public static List<Field> getAllFields(List<Field> fields, Class<?> type, Filter filter) {
         Field[] fieldsArr = type.getDeclaredFields();
         if (filter != null) {

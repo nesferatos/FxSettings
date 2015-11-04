@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
  * Created by nesferatos on 01.09.2015.
  */
 
-
 @Target(value = ElementType.FIELD)
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Setting {

@@ -12,7 +12,7 @@ import javafx.scene.control.ButtonType;
  */
 public class FactoryUtils {
 
-    public static void createProductByTreeItem(PropertyTreeItem propertyTreeItem) {
+    static void createProductByTreeItem(PropertyTreeItem propertyTreeItem) {
         SettingsFactory factory = FactoryRegistry.getInstance().get(propertyTreeItem.getFactoryName());
         //Tree parent = ((PropertyTreeItem) propertyTreeItem.getParent()).getData();
         PropertyTreeItem parentTreeItem = (PropertyTreeItem) propertyTreeItem.getParent();

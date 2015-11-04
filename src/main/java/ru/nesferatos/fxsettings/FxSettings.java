@@ -11,6 +11,10 @@ import javafx.scene.control.Skin;
 public class FxSettings extends Control {
     private ObjectProperty root = new SimpleObjectProperty<>();
 
+    /***
+     *
+     * @param root Root object of settings model
+     */
     public FxSettings(Object root) {
         this.root.set(root);
     }

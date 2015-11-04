@@ -17,10 +17,6 @@ public class FactoryRegistry {
         return instance;
     }
 
-    public synchronized boolean registered(String name) {
-        return registry.containsKey(name);
-    }
-
     public synchronized SettingsFactory get(String name) {
         return registry.get(name);
     }
