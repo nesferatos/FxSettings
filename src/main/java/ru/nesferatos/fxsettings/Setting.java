@@ -16,6 +16,7 @@ public @interface Setting {
     String desc() default "";
     String category() default "";
     String factoryName() default "";
+    String registryName() default "";
     boolean isEditableField() default true;
     boolean forceNotNode() default false;
 }

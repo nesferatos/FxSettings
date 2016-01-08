@@ -21,6 +21,12 @@ public class FxSettingsSimpleExample extends Application {
         @Setting(factoryName = "childFactory")
         List<Human> children = new ArrayList<>();
 
+        @Setting(registryName = "people")
+        Human bestFriend;
+
+        @Setting(registryName = "people")
+        List friends = new ArrayList<>();
+
         @Override
         public String getTreeItemValue() {
             return name;
@@ -32,7 +38,9 @@ public class FxSettingsSimpleExample extends Application {
         FactoryRegistry.getInstance().register("childFactory", new SettingsFactory<Human, Object>() {
             @Override
             public Human createProduct(Object settingObj, PropertyTreeItem parent) throws ValidationException {
-                return new Human();
+                Human human = new Human();
+                SettingsRegistry.getInstance().put("people", human);
+                return human;
             }
 
             @Override
@@ -40,6 +48,7 @@ public class FxSettingsSimpleExample extends Application {
                 return null;
             }
         });
+
 
         Human adam = new Human();
 

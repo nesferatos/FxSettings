@@ -4,25 +4,27 @@ import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.KeyBinding;
 import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import org.controlsfx.control.PropertySheet;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
+import org.controlsfx.control.*;
+import org.controlsfx.property.editor.AbstractPropertyEditor;
+import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +72,7 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
         List<Field> propertiesList = PropertyUtils.getSettings(fxSettings.getRoot());
         ObservableList list = FXCollections.observableList(new ArrayList<>());
         list.addAll(propertiesList.stream().map(field -> {
-            return new CustomPropertyItem(field, fxSettings.getRoot(), item);
+            return new FxSettingsPropertyItem(field, fxSettings.getRoot(), item);
         }).collect(Collectors.toList()));
 
         getChildren().add(splitPane);
@@ -112,9 +114,27 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
             List<Field> propertiesList = PropertyUtils.getSettings(data);
 
             ObservableList list = FXCollections.observableList(new ArrayList<>());
-            list.addAll(propertiesList.stream().map(field -> new CustomPropertyItem(field, data, propertyTreeItem)).collect(Collectors.toList()));
+            list.addAll(propertiesList.stream().map(field -> new FxSettingsPropertyItem(field, data, propertyTreeItem)).collect(Collectors.toList()));
 
             PropertySheet propertySheet = new PropertySheet(list);
+
+
+            final Callback<PropertySheet.Item, PropertyEditor<?>> stdPropectyEditorFactory = propertySheet.getPropertyEditorFactory();
+
+            propertySheet.setPropertyEditorFactory(new Callback<PropertySheet.Item, PropertyEditor<?>>() {
+                @Override
+                public PropertyEditor<?> call(PropertySheet.Item param) {
+                    FxSettingsPropertyItem item = (FxSettingsPropertyItem) param;
+                    String registryName = ((FxSettingsPropertyItem) param).getSettingAnnotation().registryName();
+                    if (!(registryName.isEmpty())) {
+                        if (item.getType() == List.class) { //TODO: should be replaced by something like instanceof List
+                            return createChoicesEditor(item, SettingsRegistry.getInstance().get(registryName));
+                        }
+                        return createChoiceEditor(item, SettingsRegistry.getInstance().get(registryName));
+                    }
+                    return stdPropectyEditorFactory.call(param);
+                }
+            });
 
             borderPane.setCenter(propertySheet);
 
@@ -126,7 +146,79 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
         return borderPane;
     }
 
-    class CustomPropertyItem implements PropertySheet.Item {
+    public static final <T> PropertyEditor<?> createChoiceEditor(PropertySheet.Item property, final Collection<T> choices) {
+
+        return new AbstractPropertyEditor<T, ComboBox<T>>(property, new ComboBox<T>()) {
+
+            {
+                getEditor().setConverter(new StringConverter<T>() {
+                    @Override
+                    public String toString(T object) {
+                        return PropertyUtils.getNameFor(object, null);
+                    }
+
+                    @Override
+                    public T fromString(String string) {
+                        return null;
+                    }
+                });
+                getEditor().setItems(FXCollections.observableArrayList(choices));
+            }
+
+            @Override
+            protected ObservableValue<T> getObservableValue() {
+                return getEditor().getSelectionModel().selectedItemProperty();
+            }
+
+            @Override
+            public void setValue(T value) {
+                getEditor().getSelectionModel().select(value);
+            }
+        };
+    }
+
+    public static final <T> PropertyEditor<?> createChoicesEditor(PropertySheet.Item property, final Collection<T> choices) {
+
+        return new AbstractPropertyEditor<T, CheckComboBox<T>>(property, new CheckComboBox<T>()) {
+            {
+                getEditor().setConverter(new StringConverter<T>() {
+                    @Override
+                    public String toString(T object) {
+                        return PropertyUtils.getNameFor(object, null);
+                    }
+
+                    @Override
+                    public T fromString(String string) {
+                        return null;
+                    }
+                });
+                getEditor().getItems().addAll((FXCollections.observableArrayList(choices)));
+                for (T o : (List<T>) property.getValue()) {
+                    getEditor().getCheckModel().check(o);
+                }
+
+                getEditor().getCheckModel().getCheckedIndices().addListener(new ListChangeListener<Integer>() {
+                    @Override
+                    public void onChanged(Change<? extends Integer> c) {
+                        ((Collection) property.getValue()).clear();
+                        ((Collection) property.getValue()).addAll(getEditor().getCheckModel().getCheckedItems());
+                    }
+                });
+            }
+
+            @Override
+            protected ObservableValue<T> getObservableValue() {
+                ObservableValue<T> v = new SimpleObjectProperty<>((T) getEditor().getCheckModel());
+                return v;
+            }
+
+            @Override
+            public void setValue(T value) {
+            }
+        };
+    }
+
+    class FxSettingsPropertyItem implements PropertySheet.Item {
 
         Class type;
         Object container;
@@ -134,14 +226,20 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
         Field field;
         PropertyTreeItem propertyTreeItem;
 
-        public CustomPropertyItem(Field field, Object container, PropertyTreeItem propertyTreeItem) {
+        public Setting getSettingAnnotation() {
+            return settingAnnotation;
+        }
+
+        Setting settingAnnotation;
+
+        public FxSettingsPropertyItem(Field field, Object container, PropertyTreeItem propertyTreeItem) {
             this.field = field;
             this.container = container;
             this.type = field.getType();
-            Setting setting = field.getAnnotation(Setting.class);
-            this.category = setting.category();
-            this.description = setting.desc();
-            this.name = (setting.name().isEmpty()) ? field.getName() : setting.name();
+            settingAnnotation = field.getAnnotation(Setting.class);
+            this.category = settingAnnotation.category();
+            this.description = settingAnnotation.desc();
+            this.name = (settingAnnotation.name().isEmpty()) ? field.getName() : settingAnnotation.name();
             this.propertyTreeItem = propertyTreeItem;
         }
 
@@ -176,9 +274,5 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
             propertyTreeItem.setValue(PropertyUtils.getNameFor(container, propertyTreeItem.getField()));
         }
 
-        @Override
-        public Optional<Class<? extends PropertyEditor<?>>> getPropertyEditorClass() {
-            return Optional.empty();
-        }
     }
 }
