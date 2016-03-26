@@ -35,6 +35,9 @@ class SettingsMasterCell extends TreeCell {
                 ((List)parent.getData()).remove(i.getData());
                 parent.rebuildChildren();
             }
+            if (!parent.getRegistryName().equals("")) {
+                SettingsRegistry.getInstance().remove(parent.getRegistryName(), i.getData());
+            }
         });
         contextMenu.getItems().add(menuItem);
 

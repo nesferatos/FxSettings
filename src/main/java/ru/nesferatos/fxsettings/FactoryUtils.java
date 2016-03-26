@@ -33,6 +33,7 @@ public class FactoryUtils {
             okButton.addEventFilter(ActionEvent.ACTION, event -> {
                 try {
                     Object product = factory.createProduct(productParamObj, parentTreeItem);//TODO: maybe it can be more beautiful)
+                    putToRegistry(propertyTreeItem.getRegistryName(), product);
                     propertyTreeItem.createCommand(product);
                 } catch (ValidationException e) {
                     alert.setHeaderText(e.getMessage());
@@ -44,11 +45,18 @@ public class FactoryUtils {
         } else {
             try {
                 Object product = factory.createProduct(null, parentTreeItem);
+                putToRegistry(propertyTreeItem.getRegistryName(), product);
                 propertyTreeItem.createCommand(product);
             } catch (ValidationException e) {
                 e.printStackTrace();
             }
         }
 
+    }
+
+    private static void putToRegistry(String registry, Object obj) {
+        if (!registry.equals("")) {
+            SettingsRegistry.getInstance().put(registry, obj);
+        }
     }
 }

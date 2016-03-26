@@ -115,7 +115,7 @@ class PropertyTreeItem extends TreeItem {
         if (value != null) {
             if (value instanceof List) {
                 for (Object i : ((List) value)) {
-                    newChildren.add(new PropertyTreeItem(i, null));//TODO: make remove action
+                    newChildren.add(new PropertyTreeItem(i, null));
                 }
             }
             List<Field> fields = PropertyUtils.getSettingNodes(value);

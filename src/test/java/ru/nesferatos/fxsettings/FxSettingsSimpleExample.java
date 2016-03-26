@@ -18,7 +18,7 @@ public class FxSettingsSimpleExample extends Application {
         @Setting
         String name;
 
-        @Setting(factoryName = "childFactory")
+        @Setting(factoryName = "childFactory", registryName = "people")
         List<Human> children = new ArrayList<>();
 
         @Setting(registryName = "people")
@@ -39,7 +39,6 @@ public class FxSettingsSimpleExample extends Application {
             @Override
             public Human createProduct(Object settingObj, PropertyTreeItem parent) throws ValidationException {
                 Human human = new Human();
-                SettingsRegistry.getInstance().put("people", human);
                 return human;
             }
 

@@ -29,6 +29,10 @@ public class SettingsRegistry {
         }
     }
 
+    public void remove(String key, Object obj) {
+        registryMap.get(key).remove(obj);
+    }
+
     public void put(String key, Object obj) {
         if (!registryMap.containsKey(key)) {
             registryMap.put(key, new ArrayList<>());
