@@ -9,6 +9,7 @@ import javafx.scene.control.Skin;
  * Created by nesferatos on 16.09.2015.
  */
 public class FxSettings extends Control {
+
     private ObjectProperty root = new SimpleObjectProperty<>();
 
     /***

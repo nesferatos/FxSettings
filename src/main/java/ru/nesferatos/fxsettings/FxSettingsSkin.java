@@ -3,14 +3,11 @@ package ru.nesferatos.fxsettings;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.KeyBinding;
 import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -20,7 +17,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.controlsfx.control.*;
 import org.controlsfx.property.editor.AbstractPropertyEditor;
-import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.lang.reflect.Field;
@@ -119,7 +115,7 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
             PropertySheet propertySheet = new PropertySheet(list);
 
 
-            final Callback<PropertySheet.Item, PropertyEditor<?>> stdPropectyEditorFactory = propertySheet.getPropertyEditorFactory();
+            final Callback<PropertySheet.Item, PropertyEditor<?>> stdPropertyEditorFactory = propertySheet.getPropertyEditorFactory();
 
             propertySheet.setPropertyEditorFactory(new Callback<PropertySheet.Item, PropertyEditor<?>>() {
                 @Override
@@ -132,7 +128,7 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
                         }
                         return createChoiceEditor(item, SettingsRegistry.getInstance().get(registryName));
                     }
-                    return stdPropectyEditorFactory.call(param);
+                    return stdPropertyEditorFactory.call(param);
                 }
             });
 
@@ -218,61 +214,4 @@ public class FxSettingsSkin extends BehaviorSkinBase<FxSettings, BehaviorBase<Fx
         };
     }
 
-    class FxSettingsPropertyItem implements PropertySheet.Item {
-
-        Class type;
-        Object container;
-        String name, category, description;
-        Field field;
-        PropertyTreeItem propertyTreeItem;
-
-        public Setting getSettingAnnotation() {
-            return settingAnnotation;
-        }
-
-        Setting settingAnnotation;
-
-        public FxSettingsPropertyItem(Field field, Object container, PropertyTreeItem propertyTreeItem) {
-            this.field = field;
-            this.container = container;
-            this.type = field.getType();
-            settingAnnotation = field.getAnnotation(Setting.class);
-            this.category = settingAnnotation.category();
-            this.description = settingAnnotation.desc();
-            this.name = (settingAnnotation.name().isEmpty()) ? field.getName() : settingAnnotation.name();
-            this.propertyTreeItem = propertyTreeItem;
-        }
-
-        @Override
-        public Class<?> getType() {
-            return type;
-        }
-
-        @Override
-        public String getCategory() {
-            return category;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public Object getValue() {
-            return PropertyUtils.get(container, field);
-        }
-
-        @Override
-        public void setValue(Object value) {
-            PropertyUtils.set(container, field, value);
-            propertyTreeItem.setValue(PropertyUtils.getNameFor(container, propertyTreeItem.getField()));
-        }
-
-    }
 }

@@ -2,9 +2,6 @@ package ru.nesferatos.fxsettings;
 
 import com.thoughtworks.xstream.XStream;
 import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.event.EventType;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;

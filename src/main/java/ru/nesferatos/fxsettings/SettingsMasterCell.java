@@ -1,24 +1,43 @@
 package ru.nesferatos.fxsettings;
 
-import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 
+import java.util.List;
+
 /**
  * Created by nesferatos on 10.09.2015.
  */
-public class SettingsMasterCell extends TreeCell {
+class SettingsMasterCell extends TreeCell {
 
 
     private void factoryContextMenuInit(String factoryName) {
         ContextMenu contextMenu = new ContextMenu();
+
         MenuItem menuItem = new MenuItem(factoryName);
+        menuItem.setOnAction(event -> {
+            FactoryUtils.createProductByTreeItem((PropertyTreeItem) getTreeItem());
+        });
         contextMenu.getItems().add(menuItem);
-        menuItem.setOnAction(event -> FactoryUtils.createProductByTreeItem((PropertyTreeItem) getTreeItem()));
+
+        setContextMenu(contextMenu);
+    }
+
+
+    private void factoryChildContextMenuInit(PropertyTreeItem parent, PropertyTreeItem i) {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem menuItem = new MenuItem("remove");
+        menuItem.setOnAction(event -> {
+            if (parent.getData() instanceof List) {
+                ((List)parent.getData()).remove(i.getData());
+                parent.rebuildChildren();
+            }
+        });
+        contextMenu.getItems().add(menuItem);
+
         setContextMenu(contextMenu);
     }
 
@@ -48,8 +67,11 @@ public class SettingsMasterCell extends TreeCell {
                     setGraphic(null);
                 }
             }
+            PropertyTreeItem parentTreeItem = (PropertyTreeItem) treeItem.getParent();
             if (!treeItem.getFactoryName().equals("")) {
                 factoryContextMenuInit(treeItem.getFactoryName());
+            } else if (parentTreeItem != null && !parentTreeItem.getFactoryName().equals("")) {
+                factoryChildContextMenuInit(parentTreeItem, treeItem);
             } else {
                 setContextMenu(null);
             }

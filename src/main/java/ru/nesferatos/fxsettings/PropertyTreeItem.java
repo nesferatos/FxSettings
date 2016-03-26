@@ -19,7 +19,7 @@ interface PropertyTreeItemFunction {
     boolean process(PropertyTreeItem item);
 }
 
-public class PropertyTreeItem extends TreeItem {
+class PropertyTreeItem extends TreeItem {
 
     public static Image addToListIcon = new Image(PropertyTreeItem.class.getResourceAsStream("/add.png"));
     public static Image blankIcon = new Image(PropertyTreeItem.class.getResourceAsStream("/blank.png"));
@@ -29,6 +29,7 @@ public class PropertyTreeItem extends TreeItem {
     private ObjectProperty dataProperty = new SimpleObjectProperty<>();
     private Field field;
     private String factoryName = "";
+    private String registryName = "";
 
     public PropertyTreeItem(Object data, Field field) {
         super(PropertyUtils.getNameFor(data, field));
@@ -92,7 +93,7 @@ public class PropertyTreeItem extends TreeItem {
             if (it.getData() == getData()) {
                 it.rebuildChildren();
                 return true;
-            };
+            }
             return false;
         });
     }
@@ -114,7 +115,7 @@ public class PropertyTreeItem extends TreeItem {
         if (value != null) {
             if (value instanceof List) {
                 for (Object i : ((List) value)) {
-                    newChildren.add(new PropertyTreeItem(i, null));
+                    newChildren.add(new PropertyTreeItem(i, null));//TODO: make remove action
                 }
             }
             List<Field> fields = PropertyUtils.getSettingNodes(value);
@@ -126,6 +127,7 @@ public class PropertyTreeItem extends TreeItem {
 
                     PropertyTreeItem treeItem = new PropertyTreeItem(obj, field);
                     treeItem.factoryName = settingsAnnotation.factoryName();
+                    treeItem.registryName = settingsAnnotation.registryName();
                     if (!treeItem.factoryName.equals("")) {
                         ImageView imageView = new ImageView(getIconFor(obj));
 
@@ -158,5 +160,13 @@ public class PropertyTreeItem extends TreeItem {
 
     public Field getField() {
         return field;
+    }
+
+    public String getRegistryName() {
+        return registryName;
+    }
+
+    public void setRegistryName(String registryName) {
+        this.registryName = registryName;
     }
 }

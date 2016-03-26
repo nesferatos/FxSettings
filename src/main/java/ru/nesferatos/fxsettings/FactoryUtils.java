@@ -5,6 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import ru.nesferatos.fxsettings.*;
 
 
 /**
@@ -12,7 +13,7 @@ import javafx.scene.control.ButtonType;
  */
 public class FactoryUtils {
 
-    static void createProductByTreeItem(PropertyTreeItem propertyTreeItem) {
+    public static void createProductByTreeItem(PropertyTreeItem propertyTreeItem) {
         SettingsFactory factory = FactoryRegistry.getInstance().get(propertyTreeItem.getFactoryName());
         //Tree parent = ((PropertyTreeItem) propertyTreeItem.getParent()).getData();
         PropertyTreeItem parentTreeItem = (PropertyTreeItem) propertyTreeItem.getParent();
