@@ -1,11 +1,16 @@
 package ru.nesferatos.fxsettings;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TreeItem;
 import ru.nesferatos.fxsettings.*;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 
 /**
@@ -59,4 +64,39 @@ public class FactoryUtils {
             SettingsRegistry.getInstance().put(registry, obj);
         }
     }
+
+    public static void removeItem(PropertyTreeItem root, PropertyTreeItem item) {
+        SettingsRegistry.getInstance().remove(((PropertyTreeItem)item.getParent()).getRegistryName(), item.getData());
+        recursiveRemoveItem(root, item);
+    }
+
+    private static void recursiveRemoveItem(PropertyTreeItem root, PropertyTreeItem item) {
+        Object o =  root.getData();
+
+        List<Field> settings = PropertyUtils.getSettings(o);
+
+        if (o instanceof List) {
+            for (Object oi : (List) o) {
+                if (oi instanceof List) {
+                    ((List) oi).remove(item.getData());
+                }
+            }
+        }
+
+        for (Field setting : settings) {
+            Object property = PropertyUtils.get(o, setting);
+            if (property instanceof List) {
+                ((List) property).remove(item.getData());
+            }
+            if (property == item.getData()) {
+                PropertyUtils.set(o, setting, null);
+            }
+        }
+
+        List<TreeItem> children = root.getChildren();
+        for (TreeItem child : children) {
+            recursiveRemoveItem((PropertyTreeItem) child, item);
+        }
+    }
+
 }

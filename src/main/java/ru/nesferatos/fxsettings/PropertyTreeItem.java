@@ -67,6 +67,7 @@ class PropertyTreeItem extends TreeItem {
 
     public void createCommand(Object obj) {
 
+
         if (getData() instanceof List) {
             ((List) getData()).add(obj);
             PropertyTreeItem item = new PropertyTreeItem(obj, null);

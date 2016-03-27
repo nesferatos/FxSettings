@@ -19,7 +19,7 @@ class FxSettingsPropertyItem implements PropertySheet.Item {
         return settingAnnotation;
     }
 
-    Setting settingAnnotation;
+    private Setting settingAnnotation;
 
     public FxSettingsPropertyItem(Field field, Object container, PropertyTreeItem propertyTreeItem) {
         this.field = field;

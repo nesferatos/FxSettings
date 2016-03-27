@@ -31,12 +31,12 @@ class SettingsMasterCell extends TreeCell {
 
         MenuItem menuItem = new MenuItem("remove");
         menuItem.setOnAction(event -> {
+            if (!parent.getRegistryName().equals("")) {
+                FactoryUtils.removeItem((PropertyTreeItem) getTreeView().getRoot(), i);
+            }
             if (parent.getData() instanceof List) {
                 ((List)parent.getData()).remove(i.getData());
                 parent.rebuildChildren();
-            }
-            if (!parent.getRegistryName().equals("")) {
-                SettingsRegistry.getInstance().remove(parent.getRegistryName(), i.getData());
             }
         });
         contextMenu.getItems().add(menuItem);
